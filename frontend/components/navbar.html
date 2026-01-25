@@ -1,0 +1,50 @@
+<nav class="flex items-center justify-between px-6 md:px-16 lg:px-24 py-4 border-b border-gray-300 bg-white relative">
+
+  <!-- Logo -->
+  <a href="index.html">
+    <img class="h-9" src="assets/logo.svg" alt="logo">
+  </a>
+
+  <!-- Mobile Menu Button -->
+  <button id="menu-toggle" class="sm:hidden">
+    <img src="assets/menu_icon.svg" alt="menu">
+  </button>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu"
+       class="hidden absolute top-[60px] left-0 w-full bg-white shadow-md py-4 px-5 flex-col gap-2 text-sm sm:hidden">
+
+    <a href="index.html" class="mobile-link">Home</a>
+    <a href="products.html" class="mobile-link">All Products</a>
+    <a href="contact.html" class="mobile-link">Contact</a>
+
+    <!-- Mobile Login -->
+    <button id="mobile-login-btn"
+            class="mt-2 px-6 py-2 bg-indigo-500 text-white rounded-full text-sm">
+      Login
+    </button>
+  </div>
+
+  <!-- Desktop Menu -->
+  <div class="hidden sm:flex items-center gap-8">
+
+    <a href="index.html">Home</a>
+    <a href="products.html">All Products</a>
+    <a href="contact.html">Contact</a>
+
+    <!-- Cart -->
+    <div class="relative cursor-pointer">
+      <img src="assets/nav_cart_icon.svg" class="w-6 opacity-80">
+      <span class="absolute -top-2 -right-3 bg-indigo-500 text-white text-xs w-[18px] h-[18px] rounded-full flex items-center justify-center">
+        3
+      </span>
+    </div>
+
+    <!-- Desktop Login -->
+    <button id="desktop-login-btn"
+            class="px-6 py-2 bg-indigo-500 text-white rounded-full text-sm">
+      Login
+    </button>
+
+  </div>
+</nav>
