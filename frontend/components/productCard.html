@@ -1,0 +1,32 @@
+<div class="border border-gray-500/20 rounded-md md:px-4 px-3 py-2 bg-white w-full max-w-[280px] mx-auto hover:shadow-lg transition-shadow">
+    <div class="group cursor-pointer flex items-center justify-center px-2 h-40">
+        <img class="card-image group-hover:scale-105 transition max-h-36 object-contain" src="" alt="Product Image" />
+    </div>
+    
+    <div class="text-gray-500/60 text-sm mt-2">
+        <p class="card-category">Category</p>
+        <p class="card-title text-gray-700 font-medium text-lg truncate w-full">Product Name</p>
+
+        <div class="card-stars flex items-center gap-0.5 my-1"></div>
+
+        <div class="flex items-end justify-between mt-2">
+            <p class="md:text-xl text-base font-medium text-[var(--primary)]">
+                <span class="card-price">$00</span> 
+                <span class="card-old-price text-gray-500/60 md:text-sm text-xs line-through">$00</span>
+            </p>
+
+            <div>
+                <button class="card-add-btn flex items-center justify-center gap-1 bg-[var(--primary)]/10 border border-[var(--primary)]/50 md:w-[80px] w-[64px] h-[34px] rounded text-[var(--primary)] font-medium hover:bg-[var(--primary)]/20 transition">
+                    <img src="assets/cart_icon.svg" class="w-3" alt="">
+                    Add
+                </button>
+
+                <div class="card-counter hidden flex items-center justify-center gap-2 md:w-20 w-16 h-[34px] bg-[var(--primary)]/20 rounded select-none">
+                    <button class="btn-minus cursor-pointer text-[var(--primary)] text-lg px-2 h-full hover:text-[var(--primary-dull)]">-</button>
+                    <span class="counter-value w-5 text-center text-[var(--primary)] font-medium">1</span>
+                    <button class="btn-plus cursor-pointer text-[var(--primary)] text-lg px-2 h-full hover:text-[var(--primary-dull)]">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
