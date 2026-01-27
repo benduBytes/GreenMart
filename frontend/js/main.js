@@ -11,8 +11,11 @@ function loadComponent(id, url, callback) {
       return res.text();
     })
     .then(html => {
-      document.getElementById(id).innerHTML = html;
-      if (callback) callback();
+      const element = document.getElementById(id);
+      if (element) {
+        element.innerHTML = html;
+        if (callback) callback();
+      }
     })
     .catch(err => console.error(err));
 }
@@ -40,38 +43,55 @@ try {
 
 // ------------------ INITIALIZE APP ------------------
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Load Navbar, Login, Signup
+  // --- A. GLOBAL COMPONENTS (Run on EVERY page) ---
   loadComponent("navbar-placeholder", "components/navbar.html", attachEvents);
   loadComponent("login-placeholder", "components/login.html", attachEvents);
   loadComponent("signup-placeholder", "components/signup.html", attachEvents);
+  
+  // Load Newsletter
+  if (document.getElementById("newsletter-placeholder")) {
+      loadComponent("newsletter-placeholder", "components/newsLetter.html", () => {
+          const form = document.querySelector("#newsletter-placeholder form");
+          if(form) {
+              form.addEventListener("submit", (e) => {
+                  e.preventDefault();
+                  showToast("Subscribed successfully!");
+                  form.reset();
+              });
+          }
+      });
+  }
 
-  // 2. Load Home Banner
-  loadComponent("home-placeholder", "components/mainBanner.html", applyBannerLayoutRules);
-
-  // 3. Load Categories
-  loadComponent("categories-placeholder", "components/categories.html", renderCategories);
-
-  // 4. Load Best Sellers
-  loadComponent("bestseller-placeholder", "components/bestSeller.html", renderBestSellers);
-
-  // 5. Load Bottom Banner & Render Features
-  loadComponent("bottom-banner-placeholder", "components/bottomBanner.html", renderBottomBanner);
-
-  // 6. ADD THIS: Load Newsletter
-  loadComponent("newsletter-placeholder", "components/newsLetter.html", () => {
-      // Optional: Add submit event listener here if you want to handle the subscription
-      const form = document.querySelector("#newsletter-placeholder form");
-      if(form) {
-          form.addEventListener("submit", (e) => {
-              e.preventDefault();
-              showToast("Subscribed successfully!");
-              form.reset();
-          });
-      }
-  });
-
-  // 7. ADD THIS: Load Footer & Render Links
+  // Load Footer
   loadComponent("footer-placeholder", "components/footer.html", renderFooter);
+
+
+  // --- B. PAGE-SPECIFIC COMPONENTS ---
+
+  // 1. Home Banner
+  if (document.getElementById("home-placeholder")) {
+    loadComponent("home-placeholder", "components/mainBanner.html", applyBannerLayoutRules);
+  }
+
+  // 2. Categories
+  if (document.getElementById("categories-placeholder")) {
+    loadComponent("categories-placeholder", "components/categories.html", renderCategories);
+  }
+
+  // 3. Best Sellers
+  if (document.getElementById("bestseller-placeholder")) {
+    loadComponent("bestseller-placeholder", "components/bestSeller.html", renderBestSellers);
+  }
+
+  // 4. Bottom Banner
+  if (document.getElementById("bottom-banner-placeholder")) {
+    loadComponent("bottom-banner-placeholder", "components/bottomBanner.html", renderBottomBanner);
+  }
+
+  // 5. All Products Grid (NEW)
+  if (document.getElementById("all-products-grid")) {
+    renderAllProductsPage();
+  }
 });
 
 // ------------------ CART LOGIC ------------------
@@ -118,7 +138,10 @@ function removeFromCart(itemId) {
 function saveCart() {
   localStorage.setItem("cartItems", JSON.stringify(cartItems));
   updateNavbarBadge();
-  renderBestSellers(); // Re-render grid to update button states
+  
+  // Refresh grids if they exist to update button states
+  if(document.getElementById("bestseller-grid")) renderBestSellers();
+  if(document.getElementById("all-products-grid")) renderAllProductsPage();
 }
 
 // ------------------ BEST SELLER RENDERING ------------------
@@ -146,11 +169,72 @@ async function renderBestSellers() {
   const bestSellers = products.slice(0, 5); 
 
   bestSellers.forEach(product => {
+    // Reuse the card generation logic
+    const card = createProductCard(product);
+    grid.appendChild(card);
+  });
+}
+
+// ------------------ ALL PRODUCTS PAGE LOGIC (NEW) ------------------
+async function renderAllProductsPage() {
+    const grid = document.getElementById("all-products-grid");
+    if (!grid || typeof products === 'undefined') return;
+
+    // 1. Get Search Query
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
+
+    // 2. Filter Products
+    let displayProducts = products;
+    if (searchQuery) {
+        displayProducts = products.filter(item => 
+            item.name.toLowerCase().includes(searchQuery) || 
+            item.category.toLowerCase().includes(searchQuery)
+        );
+
+        // Show search message
+        const msg = document.getElementById("search-result-msg");
+        const txt = document.getElementById("search-query-text");
+        if (msg && txt) {
+            msg.classList.remove("hidden");
+            txt.textContent = searchQuery;
+        }
+    }
+
+    // 3. Fetch Template
+    if (!productCardTemplate) {
+        try {
+            const res = await fetch("components/productCard.html");
+            if (!res.ok) throw new Error("Template not found");
+            productCardTemplate = await res.text();
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+    }
+
+    grid.innerHTML = "";
+
+    if (displayProducts.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>`;
+        return;
+    }
+
+    // 4. Render Items
+    displayProducts.forEach(product => {
+        const card = createProductCard(product);
+        grid.appendChild(card);
+    });
+}
+
+// ------------------ HELPER: CREATE CARD ------------------
+// Shared logic to generate a card element from template
+function createProductCard(product) {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = productCardTemplate;
     const card = tempDiv.firstElementChild;
 
-    // --- MAPPING DATA ---
+    // Map Data
     const img = card.querySelector(".card-image");
     if(img) img.src = product.image[0]; 
 
@@ -166,7 +250,7 @@ async function renderBestSellers() {
     const oldPrice = card.querySelector(".card-old-price");
     if(oldPrice) oldPrice.textContent = `${CURRENCY}${product.price}`;
 
-    // --- STARS ---
+    // Stars
     const starsContainer = card.querySelector(".card-stars");
     if (starsContainer) {
         starsContainer.innerHTML = "";
@@ -179,66 +263,64 @@ async function renderBestSellers() {
         starsContainer.insertAdjacentHTML('beforeend', '<p class="text-xs text-gray-400 ml-1">(4)</p>');
     }
 
-    // === BUTTON vs COUNTER LOGIC ===
+    // Button State Logic
     const addBtn = card.querySelector(".card-add-btn");
     const counterWidget = card.querySelector(".card-counter");
     const counterValue = card.querySelector(".counter-value");
     const btnPlus = card.querySelector(".btn-plus");
     const btnMinus = card.querySelector(".btn-minus");
 
-    const qty = cartItems[product._id] || 0;
+    const updateState = () => {
+        const qty = cartItems[product._id] || 0;
+        if (qty > 0) {
+            addBtn.classList.add("hidden");
+            counterWidget.classList.remove("hidden");
+            counterWidget.classList.add("flex");
+            counterValue.textContent = qty;
+        } else {
+            addBtn.classList.remove("hidden");
+            counterWidget.classList.add("hidden");
+            counterWidget.classList.remove("flex");
+        }
+    };
+    updateState();
 
-    if (qty > 0) {
-        addBtn.classList.add("hidden");
-        counterWidget.classList.remove("hidden");
-        counterWidget.classList.add("flex"); 
-        counterValue.textContent = qty;
-    } else {
-        addBtn.classList.remove("hidden");
-        counterWidget.classList.add("hidden");
-        counterWidget.classList.remove("flex");
-    }
-
-    // --- EVENT LISTENERS ---
+    // Listeners
     addBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         addToCart(product._id);
+        updateState();
     });
 
-    if(btnPlus) {
-        btnPlus.addEventListener("click", (e) => {
-            e.stopPropagation();
-            addToCart(product._id);
-        });
-    }
+    if(btnPlus) btnPlus.addEventListener("click", (e) => {
+        e.stopPropagation();
+        addToCart(product._id);
+        updateState();
+    });
 
-    if(btnMinus) {
-        btnMinus.addEventListener("click", (e) => {
-            e.stopPropagation();
-            removeFromCart(product._id);
-        });
-    }
+    if(btnMinus) btnMinus.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeFromCart(product._id);
+        updateState();
+    });
 
+    // Navigation
     card.addEventListener("click", () => {
-        window.location.href = `/product.html?id=${product._id}`;
+        window.location.href = `product.html?id=${product._id}`;
     });
 
-    grid.appendChild(card);
-  });
+    return card;
 }
 
 // ------------------ BOTTOM BANNER LOGIC ------------------
 function renderBottomBanner() {
   const container = document.getElementById("features-container");
-  
   if (!container || typeof features === 'undefined') return;
 
   container.innerHTML = "";
-
   features.forEach(feature => {
     const div = document.createElement("div");
     div.className = "flex items-center gap-4"; 
-
     div.innerHTML = `
       <img src="${feature.icon}" alt="${feature.title}" class="md:w-11 w-9 object-contain" />
       <div class="flex flex-col">
@@ -246,7 +328,6 @@ function renderBottomBanner() {
         <p class="text-gray-500/70 text-xs md:text-sm leading-tight">${feature.description}</p>
       </div>
     `;
-
     container.appendChild(div);
   });
 }
@@ -257,22 +338,17 @@ function renderCategories() {
   if (!grid || typeof categories === 'undefined') return;
 
   grid.innerHTML = "";
-
   categories.forEach(cat => {
     const div = document.createElement("div");
     div.className = "group cursor-pointer py-5 px-3 gap-2 rounded-lg flex flex-col justify-center items-center hover:shadow-md transition-all";
     div.style.backgroundColor = cat.bgColor;
-
     div.addEventListener("click", () => {
-      window.location.href = `/properties/${cat.path.toLowerCase()}`;
-      window.scrollTo(0, 0);
+      window.location.href = `products.html?search=${cat.text.toLowerCase()}`;
     });
-
     div.innerHTML = `
       <img src="${cat.image}" alt="${cat.text}" class="group-hover:scale-110 transition duration-300 max-w-28" />
       <p class="text-sm font-medium text-black/80">${cat.text}</p>
     `;
-
     grid.appendChild(div);
   });
 }
@@ -283,7 +359,6 @@ function showToast(message) {
   toast.className = "fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg text-sm z-50 transition-opacity duration-300";
   toast.innerText = message;
   document.body.appendChild(toast);
-
   setTimeout(() => {
     toast.style.opacity = "0";
     setTimeout(() => toast.remove(), 300);
@@ -306,17 +381,18 @@ function attachEvents() {
   menuToggle = document.getElementById("menu-toggle");
   mobileMenu = document.getElementById("mobile-menu");
 
+  // 1. Mobile Menu
   if (menuToggle && mobileMenu) {
     const newToggle = menuToggle.cloneNode(true);
     menuToggle.parentNode.replaceChild(newToggle, menuToggle);
     menuToggle = newToggle;
-
     menuToggle.addEventListener("click", () => {
       mobileMenu.classList.toggle("hidden");
       mobileMenu.classList.toggle("flex");
     });
   }
 
+  // 2. Close Menu on Link Click
   document.querySelectorAll(".mobile-link").forEach(link => {
     link.addEventListener("click", () => {
       mobileMenu?.classList.add("hidden");
@@ -324,12 +400,39 @@ function attachEvents() {
     });
   });
 
+  // 3. Highlight Active Link
+  const currentPath = window.location.pathname;
+  document.querySelectorAll("nav a").forEach(link => {
+      const href = link.getAttribute("href");
+      // Basic check for active state
+      if (href && (currentPath.endsWith(href) || (currentPath === "/" && href === "index.html"))) {
+          link.classList.add("text-black", "font-medium");
+          link.classList.remove("text-gray-700");
+      }
+  });
+
+  // 4. Search Logic
+  const searchInput = document.getElementById("search-input");
+  const searchBtn = document.getElementById("search-btn");
+  const performSearch = () => {
+    const query = searchInput.value.trim().toLowerCase();
+    if (query) {
+      window.location.href = `products.html?search=${query}`;
+    }
+  };
+  if (searchInput && searchBtn) {
+    searchBtn.addEventListener("click", performSearch);
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") performSearch();
+    });
+  }
+
   updateAuthButtons();
   setupForms();
   updateNavbarBadge(); 
 }
 
-// ------------------ MODAL HELPERS ------------------
+// ------------------ MODAL & AUTH ------------------
 window.openLogin = function() {
   signupModal?.classList.add("hidden");
   loginModal?.classList.remove("hidden");
@@ -347,22 +450,18 @@ window.closeAuth = function() {
   signupModal?.classList.add("hidden");
 };
 
-// ------------------ AUTH LOGIC ------------------
 function updateAuthButtons() {
   const isLoggedIn = currentUser !== null;
+  const mobileLoginBtn = document.getElementById("mobile-login-btn");
+  const mobileMyOrders = document.getElementById("mobile-my-orders");
   
   // Mobile
-  const mobileMyOrders = document.getElementById("mobile-my-orders");
-  const mobileLoginBtn = document.getElementById("mobile-login-btn");
   if (mobileLoginBtn) {
     if (isLoggedIn) {
       mobileMyOrders?.classList.remove("hidden");
       mobileLoginBtn.textContent = "Logout";
-      mobileLoginBtn.classList.replace("bg-indigo-500", "bg-red-500");
-      
-      const newMobileBtn = mobileLoginBtn.cloneNode(true);
-      mobileLoginBtn.parentNode.replaceChild(newMobileBtn, mobileLoginBtn);
-      newMobileBtn.onclick = () => {
+      mobileLoginBtn.classList.replace("bg-[var(--primary)]", "bg-red-500");
+      mobileLoginBtn.onclick = () => {
         currentUser = null;
         localStorage.removeItem("currentUser");
         location.reload();
@@ -370,11 +469,8 @@ function updateAuthButtons() {
     } else {
       mobileMyOrders?.classList.add("hidden");
       mobileLoginBtn.textContent = "Login";
-      mobileLoginBtn.classList.replace("bg-red-500", "bg-indigo-500");
-      
-      const newMobileBtn = mobileLoginBtn.cloneNode(true);
-      mobileLoginBtn.parentNode.replaceChild(newMobileBtn, mobileLoginBtn);
-      newMobileBtn.onclick = window.openLogin;
+      mobileLoginBtn.classList.replace("bg-red-500", "bg-[var(--primary)]");
+      mobileLoginBtn.onclick = window.openLogin;
     }
   }
 
@@ -388,7 +484,6 @@ function updateAuthButtons() {
       desktopLoginBtn.classList.add("hidden");
       userDropdown.classList.remove("hidden");
       userDropdown.classList.add("block");
-      
       if (desktopLogoutBtn) {
         desktopLogoutBtn.onclick = () => {
           currentUser = null;
@@ -398,12 +493,9 @@ function updateAuthButtons() {
       }
     } else {
       desktopLoginBtn.classList.remove("hidden");
-      const newDesktopBtn = desktopLoginBtn.cloneNode(true);
-      desktopLoginBtn.parentNode.replaceChild(newDesktopBtn, desktopLoginBtn);
-      newDesktopBtn.onclick = window.openLogin;
-
       userDropdown.classList.add("hidden");
       userDropdown.classList.remove("block");
+      desktopLoginBtn.onclick = window.openLogin;
     }
   }
 }
@@ -418,15 +510,12 @@ function setupForms() {
   if (loginForm) {
     const newLoginForm = loginForm.cloneNode(true);
     loginForm.parentNode.replaceChild(newLoginForm, loginForm);
-
     newLoginForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const email = newLoginForm.querySelector('input[type="email"]').value.trim();
       const password = newLoginForm.querySelector('input[type="password"]').value;
-
       const user = users.find(u => u.email === email && u.password === password);
       if (!user) return alert("Invalid credentials!");
-
       currentUser = user;
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
       window.closeAuth();
@@ -437,18 +526,14 @@ function setupForms() {
   if (signupForm) {
     const newSignupForm = signupForm.cloneNode(true);
     signupForm.parentNode.replaceChild(newSignupForm, signupForm);
-
     newSignupForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const email = newSignupForm.querySelector('input[type="email"]').value.trim();
       const password = newSignupForm.querySelector('input[type="password"]').value;
-
       if (users.find(u => u.email === email)) return alert("Email already registered!");
-
       const newUser = { email, password };
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
-      
       currentUser = newUser;
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
       window.closeAuth();
@@ -456,49 +541,36 @@ function setupForms() {
     });
   }
 }
+
 // ------------------ FOOTER LOGIC ------------------
 function renderFooter() {
   const container = document.getElementById("footer-links-container");
   if (!container || typeof footerLinks === 'undefined') return;
 
   container.innerHTML = "";
-
   footerLinks.forEach(section => {
-    // 1. Column Div
     const col = document.createElement("div");
-    
-    // 2. Title (Exact classes from your snippet)
     const title = document.createElement("h3");
     title.className = "font-semibold text-base text-gray-900 md:mb-5 mb-2";
     title.textContent = section.title;
     col.appendChild(title);
 
-    // 3. List (Exact classes from your snippet)
     const ul = document.createElement("ul");
     ul.className = "text-sm space-y-1";
 
     section.links.forEach(link => {
       const li = document.createElement("li");
       const a = document.createElement("a");
-      
-      // The "Redirect" logic
       a.href = link.url;
       a.textContent = link.text;
-      
-      // Exact styling classes
-      a.className = "hover:underline transition"; 
-      
+      a.className = "hover:underline transition text-gray-600 hover:text-gray-900";
       li.appendChild(a);
       ul.appendChild(li);
     });
-
     col.appendChild(ul);
     container.appendChild(col);
   });
 
-  // --- Part 2: Update Copyright Year (NEW) ---
   const yearSpan = document.getElementById("copyright-year");
-  if (yearSpan) {
-      yearSpan.textContent = new Date().getFullYear();
-  }
+  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 }
