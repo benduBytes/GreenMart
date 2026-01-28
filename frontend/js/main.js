@@ -88,9 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loadComponent("bottom-banner-placeholder", "components/bottomBanner.html", renderBottomBanner);
   }
 
-  // 5. All Products Grid (NEW)
+  // 5. All Products Grid
   if (document.getElementById("all-products-grid")) {
     renderAllProductsPage();
+  }
+
+  // 6. Single Product Details (NEW)
+  if (document.getElementById("product-content")) {
+    renderProductDetails();
   }
 });
 
@@ -142,6 +147,10 @@ function saveCart() {
   // Refresh grids if they exist to update button states
   if(document.getElementById("bestseller-grid")) renderBestSellers();
   if(document.getElementById("all-products-grid")) renderAllProductsPage();
+  if(document.getElementById("related-products-grid")) {
+      // Re-render related if needed to update button states, 
+      // but simpler to just reload page or leave as is.
+  }
 }
 
 // ------------------ BEST SELLER RENDERING ------------------
@@ -175,33 +184,59 @@ async function renderBestSellers() {
   });
 }
 
-// ------------------ ALL PRODUCTS PAGE LOGIC (NEW) ------------------
+// ------------------ ALL PRODUCTS / CATEGORY PAGE LOGIC ------------------
 async function renderAllProductsPage() {
     const grid = document.getElementById("all-products-grid");
+    const titleElement = document.getElementById("page-title");
+    
+    // Safety check
     if (!grid || typeof products === 'undefined') return;
 
-    // 1. Get Search Query
+    // 1. Get URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
+    const categoryParam = urlParams.get("category"); // e.g. "Vegetables"
+    const searchParam = urlParams.get("search");     // e.g. "apple"
 
-    // 2. Filter Products
     let displayProducts = products;
-    if (searchQuery) {
+
+    // --- LOGIC A: CATEGORY FILTER ---
+    if (categoryParam) {
+        const lowerCat = categoryParam.toLowerCase();
+
+        // Filter products
         displayProducts = products.filter(item => 
-            item.name.toLowerCase().includes(searchQuery) || 
-            item.category.toLowerCase().includes(searchQuery)
+            item.category.toLowerCase() === lowerCat
         );
 
-        // Show search message
+        // Find Category Display Text (e.g. "Organic Veggies")
+        if (typeof categories !== 'undefined') {
+            const catObj = categories.find(c => c.path.toLowerCase() === lowerCat);
+            if (catObj && titleElement) {
+                titleElement.textContent = catObj.text; // Update Title
+            }
+        }
+    } 
+    // --- LOGIC B: SEARCH FILTER ---
+    else if (searchParam) {
+        const lowerSearch = searchParam.toLowerCase();
+        displayProducts = products.filter(item => 
+            item.name.toLowerCase().includes(lowerSearch) || 
+            item.category.toLowerCase().includes(lowerSearch)
+        );
+        
+        // Update Title to show search term
+        if (titleElement) titleElement.textContent = `Results for "${searchParam}"`;
+        
+        // Show the specific search message
         const msg = document.getElementById("search-result-msg");
         const txt = document.getElementById("search-query-text");
         if (msg && txt) {
             msg.classList.remove("hidden");
-            txt.textContent = searchQuery;
+            txt.textContent = searchParam;
         }
     }
 
-    // 3. Fetch Template
+    // 2. Fetch Template (Standard Logic)
     if (!productCardTemplate) {
         try {
             const res = await fetch("components/productCard.html");
@@ -213,6 +248,7 @@ async function renderAllProductsPage() {
         }
     }
 
+    // 3. Render Grid
     grid.innerHTML = "";
 
     if (displayProducts.length === 0) {
@@ -220,21 +256,95 @@ async function renderAllProductsPage() {
         return;
     }
 
-    // 4. Render Items
     displayProducts.forEach(product => {
         const card = createProductCard(product);
         grid.appendChild(card);
     });
 }
 
+// ------------------ SINGLE PRODUCT PAGE LOGIC (NEW) ------------------
+function renderProductDetails() {
+    // 1. Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    if (!productId || typeof products === 'undefined') return;
+
+    // 2. Find Product
+    const product = products.find(p => p._id === productId);
+    
+    // Redirect if not found
+    if (!product) {
+        window.location.href = "products.html";
+        return;
+    }
+
+    // 3. Populate HTML Elements
+    const imgEl = document.getElementById("main-image");
+    const nameEl = document.getElementById("prod-name");
+    const priceEl = document.getElementById("prod-price");
+    const oldPriceEl = document.getElementById("prod-old-price");
+    const descEl = document.getElementById("prod-desc");
+    const catEl = document.getElementById("prod-category");
+    const container = document.getElementById("product-content");
+
+    if (imgEl) imgEl.src = product.image[0];
+    if (nameEl) nameEl.textContent = product.name;
+    if (priceEl) priceEl.textContent = `${CURRENCY}${product.offerPrice}`;
+    if (oldPriceEl) oldPriceEl.textContent = `${CURRENCY}${product.price}`;
+    if (descEl) descEl.textContent = product.description.join(" "); // Joins array into string
+    if (catEl) catEl.textContent = product.category;
+
+    // 4. Add to Cart Logic
+    const addBtn = document.getElementById("add-to-cart-btn");
+    if(addBtn) {
+        addBtn.addEventListener("click", () => {
+            addToCart(product._id);
+        });
+    }
+
+    // 5. Reveal Content (Simple fade in)
+    if(container) container.classList.remove("opacity-0");
+
+    // 6. Render Related Products (Same Category)
+    renderRelatedProducts(product.category, product._id);
+}
+
+function renderRelatedProducts(category, currentId) {
+    const grid = document.getElementById("related-products-grid");
+    if (!grid) return;
+
+    // Filter: Same category, exclude current item, take top 5
+    const related = products
+        .filter(p => p.category === category && p._id !== currentId)
+        .slice(0, 5);
+
+    if (related.length === 0) {
+        grid.innerHTML = "<p>No related products found.</p>";
+        return;
+    }
+
+    // Fetch template if needed (likely already loaded from main.js flow, but safety check)
+    if (!productCardTemplate) {
+         fetch("components/productCard.html")
+            .then(res => res.text())
+            .then(html => {
+                productCardTemplate = html;
+                related.forEach(p => grid.appendChild(createProductCard(p)));
+            });
+    } else {
+        related.forEach(p => grid.appendChild(createProductCard(p)));
+    }
+}
+
+
 // ------------------ HELPER: CREATE CARD ------------------
-// Shared logic to generate a card element from template
 function createProductCard(product) {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = productCardTemplate;
-    const card = tempDiv.firstElementChild;
+    const card = tempDiv.firstElementChild; 
 
-    // Map Data
+    // --- 1. Map Data to HTML ---
     const img = card.querySelector(".card-image");
     if(img) img.src = product.image[0]; 
 
@@ -250,7 +360,7 @@ function createProductCard(product) {
     const oldPrice = card.querySelector(".card-old-price");
     if(oldPrice) oldPrice.textContent = `${CURRENCY}${product.price}`;
 
-    // Stars
+    // --- 2. Stars Logic ---
     const starsContainer = card.querySelector(".card-stars");
     if (starsContainer) {
         starsContainer.innerHTML = "";
@@ -263,7 +373,7 @@ function createProductCard(product) {
         starsContainer.insertAdjacentHTML('beforeend', '<p class="text-xs text-gray-400 ml-1">(4)</p>');
     }
 
-    // Button State Logic
+    // --- 3. Button vs Counter Logic ---
     const addBtn = card.querySelector(".card-add-btn");
     const counterWidget = card.querySelector(".card-counter");
     const counterValue = card.querySelector(".counter-value");
@@ -283,11 +393,11 @@ function createProductCard(product) {
             counterWidget.classList.remove("flex");
         }
     };
-    updateState();
+    updateState(); // Initialize immediately
 
-    // Listeners
+    // --- 4. Event Listeners ---
     addBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); 
         addToCart(product._id);
         updateState();
     });
@@ -304,7 +414,8 @@ function createProductCard(product) {
         updateState();
     });
 
-    // Navigation
+    // --- 5. MAIN NAVIGATION LOGIC (Correct for Static Environment) ---
+    // Uses Query Params (?id=...) instead of folders
     card.addEventListener("click", () => {
         window.location.href = `product.html?id=${product._id}`;
     });
@@ -343,7 +454,7 @@ function renderCategories() {
     div.className = "group cursor-pointer py-5 px-3 gap-2 rounded-lg flex flex-col justify-center items-center hover:shadow-md transition-all";
     div.style.backgroundColor = cat.bgColor;
     div.addEventListener("click", () => {
-      window.location.href = `products.html?search=${cat.text.toLowerCase()}`;
+      window.location.href = `products.html?category=${cat.path}`;
     });
     div.innerHTML = `
       <img src="${cat.image}" alt="${cat.text}" class="group-hover:scale-110 transition duration-300 max-w-28" />
@@ -404,7 +515,6 @@ function attachEvents() {
   const currentPath = window.location.pathname;
   document.querySelectorAll("nav a").forEach(link => {
       const href = link.getAttribute("href");
-      // Basic check for active state
       if (href && (currentPath.endsWith(href) || (currentPath === "/" && href === "index.html"))) {
           link.classList.add("text-black", "font-medium");
           link.classList.remove("text-gray-700");

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Details - GreenMart</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-[Outfit]">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="min-h-screen pt-24 pb-12 px-6 md:px-16 lg:px-24 xl:px-32">
+      
+      <div id="product-content" class="flex flex-col md:flex-row gap-10 opacity-0 transition-opacity duration-500">
+          
+          <div class="flex-1 flex flex-col items-center">
+              <div class="border border-gray-200 rounded-lg p-4 w-full max-w-[400px] flex items-center justify-center bg-white">
+                  <img id="main-image" src="" alt="Product" class="w-full h-auto object-contain max-h-[400px]">
+              </div>
+          </div>
+
+          <div class="flex-1 flex flex-col gap-4">
+              <h1 id="prod-name" class="text-3xl font-semibold text-gray-800">Loading...</h1>
+              
+              <div class="flex items-center gap-1 text-gray-500 text-sm">
+                  <div class="flex text-[var(--primary)] text-sm">
+                      <img src="assets/star_icon.svg" class="w-4"><img src="assets/star_icon.svg" class="w-4"><img src="assets/star_icon.svg" class="w-4"><img src="assets/star_icon.svg" class="w-4"><img src="assets/star_dull_icon.svg" class="w-4">
+                  </div>
+                  <span>(122 reviews)</span>
+              </div>
+
+              <div class="flex items-end gap-3">
+                  <p id="prod-price" class="text-3xl font-medium text-[var(--primary)]"></p>
+                  <p id="prod-old-price" class="text-lg text-gray-400 line-through mb-1"></p>
+              </div>
+
+              <p id="prod-desc" class="text-gray-500 text-base md:w-3/4"></p>
+
+              <div class="mt-2">
+                  <span class="text-sm font-semibold text-gray-700">Category: </span>
+                  <span id="prod-category" class="text-sm text-gray-500"></span>
+              </div>
+
+              <div class="mt-6 flex gap-4">
+                  <button id="add-to-cart-btn" class="bg-[var(--primary)] text-white px-8 py-3 rounded text-sm font-semibold hover:bg-green-700 transition active:scale-95">
+                      ADD TO CART
+                  </button>
+              </div>
+
+              <hr class="my-6 border-gray-200">
+
+              <div class="text-sm text-gray-500 flex flex-col gap-1">
+                  <p>✅ 100% Original Product.</p>
+                  <p>✅ Cash on delivery is available on this product.</p>
+                  <p>✅ Easy return and exchange policy within 7 days.</p>
+              </div>
+          </div>
+      </div>
+
+      <div class="mt-20">
+          <div class="flex flex-col items-center mb-10">
+             <p class="text-3xl font-medium uppercase text-gray-700">Related Products</p>
+             <div class="w-20 h-1 bg-[var(--primary)] rounded-full mt-2"></div>
+          </div>
+          <div id="related-products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-8"></div>
+      </div>
+
+  </main>
+
+  <div id="login-placeholder"></div>
+  <div id="signup-placeholder"></div>
+  <div id="footer-placeholder"></div>
+
+  <script src="assets/assets.js"></script>
+  <script src="assets/productsData.js"></script>
+  <script src="assets/footerData.js"></script>
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
