@@ -120,6 +120,7 @@ function updateNavbarBadge() {
 function addToCart(itemId) {
   if (cartItems[itemId]) {
     cartItems[itemId] += 1;
+    showToast("Cart updated: " + cartItems[itemId] + " items");
   } else {
     cartItems[itemId] = 1;
     showToast("Added to Cart");
@@ -528,16 +529,52 @@ function renderCategories() {
   });
 }
 
-// ------------------ HELPER: TOAST ------------------
+// ------------------ HELPER: TOAST (FIT CONTENT TOP-CENTER) ------------------
 function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg text-sm z-50 transition-opacity duration-300";
-  toast.innerText = message;
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.remove(), 300);
-  }, 2000);
+    // 1. Get or Create Container
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        // REMOVED 'w-full' and 'max-w-xs'. 
+        // Added 'w-max' (or let it float) so the container fits the children.
+        container.className = "fixed top-5 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col items-center gap-3 pointer-events-none";
+        document.body.appendChild(container);
+    }
+
+    // 2. Create Toast Element
+    const toast = document.createElement("div");
+    
+    // REMOVED 'w-full'. 
+    // Added 'whitespace-nowrap' to keep short text on one line.
+    toast.className = "pointer-events-auto bg-white text-gray-800 px-4 py-3 rounded-lg shadow-lg border border-gray-100 flex items-center gap-3 transition-all duration-300 opacity-0 -translate-y-5 whitespace-nowrap";
+    
+    // 3. Inner HTML (Green Check + Message)
+    toast.innerHTML = `
+        <div class="bg-green-500 rounded-full p-1 flex-shrink-0 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <span class="font-medium text-sm">${message}</span>
+    `;
+
+    // 4. Add to container
+    container.appendChild(toast);
+
+    // 5. Animate In
+    requestAnimationFrame(() => {
+        toast.classList.remove("opacity-0", "-translate-y-5");
+    });
+
+    // 6. Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.add("opacity-0", "-translate-y-5");
+        setTimeout(() => {
+            toast.remove();
+            if (container.children.length === 0) container.remove();
+        }, 300);
+    }, 3000);
 }
 
 // ------------------ BANNER RULES ------------------
