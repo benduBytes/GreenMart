@@ -3,6 +3,36 @@
 // --- CONFIGURATION ---
 const CURRENCY = "₹"; 
 
+// --- ADDRESS DATA (New Functionality) ---
+const defaultAddresses = [
+    { 
+        firstName: "John", 
+        lastName: "Doe", 
+        email: "john@example.com", 
+        street: "GreatStack Lane", 
+        city: "Mumbai", 
+        state: "MH", 
+        country: "India", 
+        zip: "400001", 
+        phone: "9876543210" 
+    },
+    { 
+        firstName: "Jane", 
+        lastName: "Smith", 
+        email: "jane@example.com", 
+        street: "5th Avenue", 
+        city: "New York", 
+        state: "NY", 
+        country: "USA", 
+        zip: "10001", 
+        phone: "1234567890" 
+    }
+];
+
+// Load addresses from LocalStorage or use defaults
+let userAddresses = JSON.parse(localStorage.getItem("userAddresses")) || defaultAddresses;
+let selectedAddress = userAddresses[0];
+
 // ------------------ COMPONENT LOADER ------------------
 function loadComponent(id, url, callback) {
   fetch(url)
@@ -93,26 +123,44 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAllProductsPage();
   }
 
-  // 6. Single Product Details (NEW)
+  // 6. Single Product Details
   if (document.getElementById("product-content")) {
     renderProductDetails();
   }
+
+  // 7. Cart Page
+  if (document.getElementById("cart-items-list")) {
+    renderCartPage();
+    initAddressManager(); // Initialize Address Logic
+  }
 });
 
-// ------------------ CART LOGIC ------------------
+// ------------------ CART CORE LOGIC ------------------
 
 // Update Navbar Badge
 function updateNavbarBadge() {
-  const countBadge = document.getElementById("cart-count");
-  if (!countBadge) return;
-
   const totalCount = Object.values(cartItems).reduce((sum, qty) => sum + qty, 0);
 
-  if (totalCount > 0) {
-    countBadge.textContent = totalCount;
-    countBadge.classList.remove("hidden");
-  } else {
-    countBadge.classList.add("hidden");
+  // Desktop
+  const desktopBadge = document.getElementById("cart-count");
+  if (desktopBadge) {
+    if (totalCount > 0) {
+      desktopBadge.innerText = totalCount;
+      desktopBadge.classList.remove("hidden");
+    } else {
+      desktopBadge.classList.add("hidden");
+    }
+  }
+
+  // Mobile
+  const mobileBadge = document.getElementById("mobile-cart-count");
+  if (mobileBadge) {
+    if (totalCount > 0) {
+      mobileBadge.innerText = totalCount;
+      mobileBadge.classList.remove("hidden");
+    } else {
+      mobileBadge.classList.add("hidden");
+    }
   }
 }
 
@@ -120,6 +168,7 @@ function updateNavbarBadge() {
 function addToCart(itemId) {
   if (cartItems[itemId]) {
     cartItems[itemId] += 1;
+    showToast("Cart updated");
   } else {
     cartItems[itemId] = 1;
     showToast("Added to Cart");
@@ -144,22 +193,197 @@ function saveCart() {
   localStorage.setItem("cartItems", JSON.stringify(cartItems));
   updateNavbarBadge();
   
-  // Refresh grids if they exist to update button states
+  // Refresh specific page grids if they exist
   if(document.getElementById("bestseller-grid")) renderBestSellers();
   if(document.getElementById("all-products-grid")) renderAllProductsPage();
-  if(document.getElementById("related-products-grid")) {
-      // Re-render related if needed to update button states, 
-      // but simpler to just reload page or leave as is.
-  }
+  
+  // Refresh Cart Page if active
+  if(document.getElementById("cart-items-list")) renderCartPage();
 }
+
+// ------------------ ADDRESS MANAGER (NEW) ------------------
+function initAddressManager() {
+    const addrText = document.getElementById("current-address");
+    const toggleBtn = document.getElementById("toggle-address-btn");
+    const dropdown = document.getElementById("address-dropdown");
+
+    if (!addrText || !toggleBtn || !dropdown) return;
+
+    // 1. Function to Render Selected Address (Now shows Name & Phone)
+    const renderCurrent = () => {
+        if (selectedAddress) {
+            const name = selectedAddress.firstName ? `${selectedAddress.firstName} ${selectedAddress.lastName}` : "User";
+            const phone = selectedAddress.phone ? `<br/><span class="text-xs text-gray-500">Phone: ${selectedAddress.phone}</span>` : "";
+
+            addrText.innerHTML = `
+                <span class="font-semibold text-gray-800">${name}</span><br/>
+                ${selectedAddress.street}, ${selectedAddress.city},<br/>
+                ${selectedAddress.state}, ${selectedAddress.zip}
+                ${phone}
+            `;
+        } else {
+            addrText.textContent = "No address selected";
+        }
+    };
+
+    // 2. Function to Render Dropdown Options
+    const renderDropdown = () => {
+        dropdown.innerHTML = "";
+        
+        userAddresses.forEach((addr, idx) => {
+            const item = document.createElement("div");
+            item.className = "p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 text-sm text-gray-600";
+            
+            const name = addr.firstName ? `${addr.firstName} ${addr.lastName}` : "Address " + (idx + 1);
+            
+            item.innerHTML = `
+                <p class="font-medium text-gray-900">${name}</p>
+                <p class="text-xs text-gray-500">${addr.street}, ${addr.city}</p>
+            `;
+            
+            item.onclick = () => {
+                selectedAddress = userAddresses[idx];
+                renderCurrent();
+                dropdown.classList.add("hidden");
+            };
+            dropdown.appendChild(item);
+        });
+
+        // Add New Address Option
+        const addItem = document.createElement("div");
+        addItem.className = "p-3 text-center text-[var(--primary)] font-medium cursor-pointer hover:bg-gray-50 text-sm";
+        addItem.textContent = "+ Add New Address";
+        addItem.onclick = () => {
+            window.location.href = "add-address.html";
+        };
+        dropdown.appendChild(addItem);
+    };
+
+    // 3. Event Listeners
+    toggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle("hidden");
+        // Reload addresses in case updated in another tab
+        userAddresses = JSON.parse(localStorage.getItem("userAddresses")) || defaultAddresses;
+        renderDropdown();
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest("#address-section")) {
+            dropdown.classList.add("hidden");
+        }
+    });
+
+    renderCurrent();
+}
+
+
+// ------------------ CART PAGE RENDERER (UPDATED) ------------------
+window.updateCartQuantity = function(id, value) {
+    const qty = parseInt(value);
+    if (qty > 0) {
+        cartItems[id] = qty;
+        saveCart();
+    }
+};
+
+window.deleteFromCart = function(id) {
+    delete cartItems[id];
+    showToast("Item removed");
+    saveCart();
+};
+
+function renderCartPage() {
+    const container = document.getElementById("cart-items-list");
+    if (!container || typeof products === 'undefined') return;
+
+    // Clear loading/empty state
+    container.innerHTML = "";
+
+    const cartIds = Object.keys(cartItems);
+    
+    // 1. Handle Empty Cart
+    if (cartIds.length === 0) {
+        container.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center">
+            <p class="text-gray-500 text-lg mb-4">Your cart is empty.</p>
+            <a href="products.html" class="text-[var(--primary)] font-medium hover:underline">Browse Products</a>
+        </div>`;
+        updateCartTotals(0);
+        return;
+    }
+
+    let subtotal = 0;
+
+    // 2. Loop through cart items and find product details
+    cartIds.forEach(id => {
+        const product = products.find(p => p._id === id);
+        if (product) {
+            const qty = cartItems[id];
+            const itemTotal = product.offerPrice * qty;
+            subtotal += itemTotal;
+
+            const row = document.createElement("div");
+            // Grid layout matching the header in cart.html
+            row.className = "grid grid-cols-[2fr_1fr_1fr] text-gray-500 items-center text-sm md:text-base font-medium pt-4 border-b border-gray-100 pb-4";
+            
+            row.innerHTML = `
+                <div class="flex items-center md:gap-6 gap-3 group">
+                    <div onclick="window.location.href='product.html?id=${product._id}'" 
+                         class="cursor-pointer w-16 h-16 md:w-20 md:h-20 flex items-center justify-center border border-gray-300 rounded overflow-hidden flex-shrink-0 bg-white hover:border-[var(--primary)] transition">
+                        <img class="w-full h-full object-contain p-1" src="${product.image[0]}" alt="${product.name}" />
+                    </div>
+                    <div onclick="window.location.href='product.html?id=${product._id}'" class="cursor-pointer">
+                        <p class="font-semibold text-gray-800 text-sm md:text-base truncate max-w-[100px] md:max-w-none group-hover:text-[var(--primary)] transition">${product.name}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">${product.category}</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-center">
+                    <input type="number" min="1" value="${qty}" class="border border-gray-300 w-14 py-1 text-center rounded outline-none text-gray-700 text-sm focus:border-[var(--primary)]" 
+                    onchange="updateCartQuantity('${id}', this.value)">
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-2">
+                    <p class="text-gray-900 font-medium">${CURRENCY}${itemTotal}</p>
+                    <button onclick="deleteFromCart('${id}')" class="cursor-pointer text-gray-400 hover:text-red-500 transition p-1" title="Remove Item">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="m12.5 7.5-5 5m0-5 5 5m5.833-2.5a8.333 8.333 0 1 1-16.667 0 8.333 8.333 0 0 1 16.667 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+    });
+
+    updateCartTotals(subtotal);
+}
+
+function updateCartTotals(subtotal) {
+    const subtotalEl = document.getElementById("cart-subtotal");
+    const totalEl = document.getElementById("cart-total");
+    const countEl = document.getElementById("cart-total-count");
+
+    // Tax is hardcoded for demo (2%)
+    const tax = Math.round(subtotal * 0.02); 
+    const finalTotal = subtotal + tax;
+
+    if (subtotalEl) subtotalEl.textContent = `${CURRENCY}${subtotal}`;
+    if (totalEl) totalEl.textContent = `${CURRENCY}${finalTotal}`;
+    
+    // Update Item Count Title
+    if (countEl) {
+        const count = Object.values(cartItems).reduce((a, b) => a + b, 0);
+        countEl.textContent = `${count} Items`;
+    }
+}
+
 
 // ------------------ BEST SELLER RENDERING ------------------
 async function renderBestSellers() {
   const grid = document.getElementById("bestseller-grid");
-  
   if (!grid || typeof products === 'undefined') return;
 
-  // 1. Fetch Template (Once)
   if (!productCardTemplate) {
     try {
       const res = await fetch("components/productCard.html");
@@ -171,14 +395,10 @@ async function renderBestSellers() {
     }
   }
 
-  // 2. Clear Grid
   grid.innerHTML = "";
-
-  // 3. Render Items (Show only Top 5)
   const bestSellers = products.slice(0, 5); 
 
   bestSellers.forEach(product => {
-    // Reuse the card generation logic
     const card = createProductCard(product);
     grid.appendChild(card);
   });
@@ -189,34 +409,26 @@ async function renderAllProductsPage() {
     const grid = document.getElementById("all-products-grid");
     const titleElement = document.getElementById("page-title");
     
-    // Safety check
     if (!grid || typeof products === 'undefined') return;
 
-    // 1. Get URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get("category"); // e.g. "Vegetables"
-    const searchParam = urlParams.get("search");     // e.g. "apple"
+    const categoryParam = urlParams.get("category"); 
+    const searchParam = urlParams.get("search");
 
     let displayProducts = products;
 
-    // --- LOGIC A: CATEGORY FILTER ---
     if (categoryParam) {
         const lowerCat = categoryParam.toLowerCase();
-
-        // Filter products
         displayProducts = products.filter(item => 
             item.category.toLowerCase() === lowerCat
         );
-
-        // Find Category Display Text (e.g. "Organic Veggies")
         if (typeof categories !== 'undefined') {
             const catObj = categories.find(c => c.path.toLowerCase() === lowerCat);
             if (catObj && titleElement) {
-                titleElement.textContent = catObj.text; // Update Title
+                titleElement.textContent = catObj.text; 
             }
         }
     } 
-    // --- LOGIC B: SEARCH FILTER ---
     else if (searchParam) {
         const lowerSearch = searchParam.toLowerCase();
         displayProducts = products.filter(item => 
@@ -224,10 +436,8 @@ async function renderAllProductsPage() {
             item.category.toLowerCase().includes(lowerSearch)
         );
         
-        // Update Title to show search term
         if (titleElement) titleElement.textContent = `Results for "${searchParam}"`;
         
-        // Show the specific search message
         const msg = document.getElementById("search-result-msg");
         const txt = document.getElementById("search-query-text");
         if (msg && txt) {
@@ -236,7 +446,6 @@ async function renderAllProductsPage() {
         }
     }
 
-    // 2. Fetch Template (Standard Logic)
     if (!productCardTemplate) {
         try {
             const res = await fetch("components/productCard.html");
@@ -248,7 +457,6 @@ async function renderAllProductsPage() {
         }
     }
 
-    // 3. Render Grid
     grid.innerHTML = "";
 
     if (displayProducts.length === 0) {
@@ -262,78 +470,130 @@ async function renderAllProductsPage() {
     });
 }
 
-// ------------------ SINGLE PRODUCT PAGE LOGIC (NEW) ------------------
+// ------------------ SINGLE PRODUCT PAGE LOGIC ------------------
 function renderProductDetails() {
-    // 1. Get ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
 
     if (!productId || typeof products === 'undefined') return;
 
-    // 2. Find Product
     const product = products.find(p => p._id === productId);
-    
-    // Redirect if not found
     if (!product) {
         window.location.href = "products.html";
         return;
     }
 
-    // 3. Populate HTML Elements
+    // Elements
     const imgEl = document.getElementById("main-image");
     const nameEl = document.getElementById("prod-name");
     const priceEl = document.getElementById("prod-price");
     const oldPriceEl = document.getElementById("prod-old-price");
-    const descEl = document.getElementById("prod-desc");
-    const catEl = document.getElementById("prod-category");
+    const descListEl = document.getElementById("prod-desc-list");
+    const galleryEl = document.getElementById("image-gallery");
     const container = document.getElementById("product-content");
+    const breadCategory = document.getElementById("breadcrumb-category");
+    const breadName = document.getElementById("breadcrumb-name");
 
+    // Populate
     if (imgEl) imgEl.src = product.image[0];
     if (nameEl) nameEl.textContent = product.name;
     if (priceEl) priceEl.textContent = `${CURRENCY}${product.offerPrice}`;
-    if (oldPriceEl) oldPriceEl.textContent = `${CURRENCY}${product.price}`;
-    if (descEl) descEl.textContent = product.description.join(" "); // Joins array into string
-    if (catEl) catEl.textContent = product.category;
+    if (oldPriceEl) oldPriceEl.textContent = `MRP: ${CURRENCY}${product.price}`;
+    
+    if (breadCategory) {
+        breadCategory.textContent = product.category;
+        breadCategory.onclick = () => window.location.href = `products.html?category=${product.category}`;
+    }
+    if (breadName) breadName.textContent = product.name;
 
-    // 4. Add to Cart Logic
-    const addBtn = document.getElementById("add-to-cart-btn");
-    if(addBtn) {
-        addBtn.addEventListener("click", () => {
-            addToCart(product._id);
+    if (descListEl) {
+        descListEl.innerHTML = "";
+        const descArray = Array.isArray(product.description) ? product.description : [product.description];
+        descArray.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = item;
+            descListEl.appendChild(li);
         });
     }
 
-    // 5. Reveal Content (Simple fade in)
-    if(container) container.classList.remove("opacity-0");
+    if (galleryEl && product.image.length > 0) {
+        galleryEl.innerHTML = "";
+        product.image.forEach((imgSrc) => {
+            const thumbContainer = document.createElement("div");
+            thumbContainer.className = "border max-w-24 w-20 md:w-24 h-20 md:h-24 border-gray-500/30 rounded-lg overflow-hidden cursor-pointer hover:border-[var(--primary)] transition flex-shrink-0 bg-white";
+            
+            const thumbImg = document.createElement("img");
+            thumbImg.src = imgSrc;
+            thumbImg.alt = "Thumbnail";
+            thumbImg.className = "w-full h-full object-cover hover:scale-110 transition";
 
-    // 6. Render Related Products (Same Category)
+            thumbContainer.addEventListener("click", () => {
+                if (imgEl) imgEl.src = imgSrc;
+            });
+
+            thumbContainer.appendChild(thumbImg);
+            galleryEl.appendChild(thumbContainer);
+        });
+    }
+
+    // Buttons
+    const addBtn = document.getElementById("add-to-cart-btn");
+    if(addBtn) {
+        const newBtn = addBtn.cloneNode(true); 
+        addBtn.parentNode.replaceChild(newBtn, addBtn);
+        newBtn.addEventListener("click", () => addToCart(product._id));
+    }
+
+    const buyBtn = document.getElementById("buy-now-btn");
+    if(buyBtn) {
+        const newBuyBtn = buyBtn.cloneNode(true);
+        buyBtn.parentNode.replaceChild(newBuyBtn, buyBtn);
+        newBuyBtn.addEventListener("click", () => {
+            addToCart(product._id);
+            window.location.href = "cart.html";
+        });
+    }
+
+    if(container) container.classList.remove("opacity-0");
     renderRelatedProducts(product.category, product._id);
 }
 
 function renderRelatedProducts(category, currentId) {
     const grid = document.getElementById("related-products-grid");
-    if (!grid) return;
+    if (!grid || typeof products === 'undefined') return;
 
-    // Filter: Same category, exclude current item, take top 5
+    const lowerCategory = category.toLowerCase();
     const related = products
-        .filter(p => p.category === category && p._id !== currentId)
+        .filter(p => p.category.toLowerCase() === lowerCategory && p._id !== currentId)
         .slice(0, 5);
 
+    grid.innerHTML = ""; 
+
     if (related.length === 0) {
-        grid.innerHTML = "<p>No related products found.</p>";
+        grid.innerHTML = `<p class="col-span-full text-center text-gray-400">No related products found in ${category}.</p>`;
         return;
     }
 
-    // Fetch template if needed (likely already loaded from main.js flow, but safety check)
+    const appendCards = () => {
+        related.forEach(p => {
+             const card = createProductCard(p);
+             grid.appendChild(card);
+        });
+    };
+
     if (!productCardTemplate) {
          fetch("components/productCard.html")
-            .then(res => res.text())
+            .then(res => {
+                if(!res.ok) throw new Error("Template not found");
+                return res.text();
+            })
             .then(html => {
                 productCardTemplate = html;
-                related.forEach(p => grid.appendChild(createProductCard(p)));
-            });
+                appendCards();
+            })
+            .catch(err => console.error("Error loading related template:", err));
     } else {
-        related.forEach(p => grid.appendChild(createProductCard(p)));
+        appendCards();
     }
 }
 
@@ -344,7 +604,7 @@ function createProductCard(product) {
     tempDiv.innerHTML = productCardTemplate;
     const card = tempDiv.firstElementChild; 
 
-    // --- 1. Map Data to HTML ---
+    // Data Map
     const img = card.querySelector(".card-image");
     if(img) img.src = product.image[0]; 
 
@@ -360,7 +620,7 @@ function createProductCard(product) {
     const oldPrice = card.querySelector(".card-old-price");
     if(oldPrice) oldPrice.textContent = `${CURRENCY}${product.price}`;
 
-    // --- 2. Stars Logic ---
+    // Stars
     const starsContainer = card.querySelector(".card-stars");
     if (starsContainer) {
         starsContainer.innerHTML = "";
@@ -373,7 +633,7 @@ function createProductCard(product) {
         starsContainer.insertAdjacentHTML('beforeend', '<p class="text-xs text-gray-400 ml-1">(4)</p>');
     }
 
-    // --- 3. Button vs Counter Logic ---
+    // Counter/Button Logic
     const addBtn = card.querySelector(".card-add-btn");
     const counterWidget = card.querySelector(".card-counter");
     const counterValue = card.querySelector(".counter-value");
@@ -393,9 +653,8 @@ function createProductCard(product) {
             counterWidget.classList.remove("flex");
         }
     };
-    updateState(); // Initialize immediately
+    updateState();
 
-    // --- 4. Event Listeners ---
     addBtn.addEventListener("click", (e) => {
         e.stopPropagation(); 
         addToCart(product._id);
@@ -414,8 +673,6 @@ function createProductCard(product) {
         updateState();
     });
 
-    // --- 5. MAIN NAVIGATION LOGIC (Correct for Static Environment) ---
-    // Uses Query Params (?id=...) instead of folders
     card.addEventListener("click", () => {
         window.location.href = `product.html?id=${product._id}`;
     });
@@ -464,16 +721,41 @@ function renderCategories() {
   });
 }
 
-// ------------------ HELPER: TOAST ------------------
+// ------------------ HELPER: TOAST (FIT CONTENT TOP-CENTER) ------------------
 function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg text-sm z-50 transition-opacity duration-300";
-  toast.innerText = message;
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.remove(), 300);
-  }, 2000);
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        container.className = "fixed top-5 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col items-center gap-3 pointer-events-none";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "pointer-events-auto bg-white text-gray-800 px-4 py-3 rounded-lg shadow-lg border border-gray-100 flex items-center gap-3 transition-all duration-300 opacity-0 -translate-y-5 whitespace-nowrap";
+    
+    toast.innerHTML = `
+        <div class="bg-green-500 rounded-full p-1 flex-shrink-0 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <span class="font-medium text-sm">${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.remove("opacity-0", "-translate-y-5");
+    });
+
+    setTimeout(() => {
+        toast.classList.add("opacity-0", "-translate-y-5");
+        setTimeout(() => {
+            toast.remove();
+            if (container.children.length === 0) container.remove();
+        }, 300);
+    }, 3000);
 }
 
 // ------------------ BANNER RULES ------------------
@@ -492,7 +774,6 @@ function attachEvents() {
   menuToggle = document.getElementById("menu-toggle");
   mobileMenu = document.getElementById("mobile-menu");
 
-  // 1. Mobile Menu
   if (menuToggle && mobileMenu) {
     const newToggle = menuToggle.cloneNode(true);
     menuToggle.parentNode.replaceChild(newToggle, menuToggle);
@@ -503,7 +784,6 @@ function attachEvents() {
     });
   }
 
-  // 2. Close Menu on Link Click
   document.querySelectorAll(".mobile-link").forEach(link => {
     link.addEventListener("click", () => {
       mobileMenu?.classList.add("hidden");
@@ -511,7 +791,6 @@ function attachEvents() {
     });
   });
 
-  // 3. Highlight Active Link
   const currentPath = window.location.pathname;
   document.querySelectorAll("nav a").forEach(link => {
       const href = link.getAttribute("href");
@@ -521,7 +800,6 @@ function attachEvents() {
       }
   });
 
-  // 4. Search Logic
   const searchInput = document.getElementById("search-input");
   const searchBtn = document.getElementById("search-btn");
   const performSearch = () => {
@@ -565,7 +843,6 @@ function updateAuthButtons() {
   const mobileLoginBtn = document.getElementById("mobile-login-btn");
   const mobileMyOrders = document.getElementById("mobile-my-orders");
   
-  // Mobile
   if (mobileLoginBtn) {
     if (isLoggedIn) {
       mobileMyOrders?.classList.remove("hidden");
@@ -584,7 +861,6 @@ function updateAuthButtons() {
     }
   }
 
-  // Desktop
   const desktopLoginBtn = document.getElementById("desktop-login-btn");
   const userDropdown = document.getElementById("user-dropdown");
   const desktopLogoutBtn = document.getElementById("desktop-logout-btn");

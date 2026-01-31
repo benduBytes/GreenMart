@@ -4,9 +4,18 @@
     <img class="h-9" src="assets/logo.svg" alt="logo">
   </a>
 
-  <button id="menu-toggle" class="sm:hidden">
-    <img src="assets/menu_icon.svg" alt="menu">
-  </button>
+  <div class="flex items-center gap-5 sm:hidden">
+      
+      <a href="cart.html" class="relative">
+        <img src="assets/nav_cart_icon.svg" class="w-6 min-w-5 opacity-80" alt="cart">
+        <span id="mobile-cart-count" class="absolute -top-2 -right-2 bg-[var(--primary)] text-white text-xs w-[18px] h-[18px] rounded-full flex items-center justify-center hidden">0</span>
+      </a>
+
+      <button id="menu-toggle">
+        <img src="assets/menu_icon.svg" class="w-6" alt="menu">
+      </button>
+
+  </div>
 
   <div id="mobile-menu" class="hidden absolute top-[60px] left-0 w-full bg-white shadow-md py-4 px-5 flex-col gap-2 text-sm sm:hidden z-50">
     <a href="index.html" class="mobile-link">Home</a>

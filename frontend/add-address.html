@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Address - GreenMart</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-[Outfit]">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="pt-8 pb-8 px-6 md:px-16 lg:px-24 xl:px-32">
+      
+    <div class="mb-8">
+        <p class="text-2xl md:text-3xl text-gray-500 font-medium">
+            Add Shipping <span class="font-semibold text-[var(--primary)]">Address</span>
+        </p>
+    </div>
+
+    <div class="flex flex-col-reverse md:flex-row justify-between gap-10 md:gap-16">
+        
+        <div class="flex-1 max-w-[480px]">
+            <form id="address-form" class="flex flex-col gap-4">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="firstName" required placeholder="First name" 
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+                    
+                    <input type="text" id="lastName" required placeholder="Last name" 
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+                </div>
+
+                <input type="email" id="email" required placeholder="Email address" 
+                    class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+
+                <input type="text" id="street" required placeholder="Street" 
+                    class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="city" required placeholder="City" 
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+                    
+                    <input type="text" id="state" required placeholder="State" 
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="zipcode" required placeholder="Zip code" 
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+                    
+                    <input type="text" id="country" required placeholder="Country" 
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+                </div>
+
+                <input type="tel" id="phone" required placeholder="Phone" 
+                    class="w-full px-3 py-2.5 border border-gray-300 rounded outline-none text-gray-600 focus:border-[var(--primary)] transition">
+
+                <button type="submit" class="w-full mt-4 bg-[var(--primary)] text-white py-3 font-medium uppercase hover:opacity-90 transition rounded shadow-md cursor-pointer">
+                    Save Address
+                </button>
+
+            </form>
+        </div>
+
+        <div class="flex-1 flex justify-center md:justify-end items-start">
+            <img class="w-full max-w-md object-contain rounded-lg" src="assets/add_address_image.svg" alt="Add Address Illustration"> 
+        </div>
+
+    </div>
+
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="assets/assets.js"></script>
+  <script src="assets/productsData.js"></script>
+  <script src="assets/footerData.js"></script>
+  
+  <script type="module">
+    import "./js/main.js"; 
+
+    document.getElementById("address-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const newAddress = {
+            firstName: document.getElementById("firstName").value,
+            lastName: document.getElementById("lastName").value,
+            email: document.getElementById("email").value,
+            street: document.getElementById("street").value,
+            city: document.getElementById("city").value,
+            state: document.getElementById("state").value,
+            zip: document.getElementById("zipcode").value,
+            country: document.getElementById("country").value,
+            phone: document.getElementById("phone").value
+        };
+
+        const defaultAddresses = [
+            { street: "GreatStack Lane", city: "Mumbai", state: "MH", country: "India", zip: "400001" },
+            { street: "5th Avenue", city: "New York", state: "NY", country: "USA", zip: "10001" }
+        ];
+        let addresses = JSON.parse(localStorage.getItem("userAddresses")) || defaultAddresses;
+
+        addresses.push(newAddress);
+        localStorage.setItem("userAddresses", JSON.stringify(addresses));
+        window.location.href = "cart.html";
+    });
+  </script>
+
+</body>
+</html>

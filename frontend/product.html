@@ -13,62 +13,69 @@
 
   <div id="navbar-placeholder"></div>
 
-  <main class="min-h-screen pt-24 pb-12 px-6 md:px-16 lg:px-24 xl:px-32">
-      
-      <div id="product-content" class="flex flex-col md:flex-row gap-10 opacity-0 transition-opacity duration-500">
-          
-          <div class="flex-1 flex flex-col items-center">
-              <div class="border border-gray-200 rounded-lg p-4 w-full max-w-[400px] flex items-center justify-center bg-white">
-                  <img id="main-image" src="" alt="Product" class="w-full h-auto object-contain max-h-[400px]">
-              </div>
-          </div>
+  <main class="min-h-screen pt-10 pb-12 px-6 md:px-16 lg:px-24 xl:px-32">
+    
+    <div id="product-content" class="opacity-0 transition-opacity duration-500">
+        
+        <p class="text-gray-500 text-sm mb-6">
+            <a href="index.html" class="hover:text-[var(--primary)] transition">Home</a> /
+            <a href="products.html" class="hover:text-[var(--primary)] transition">Products</a> /
+            <span id="breadcrumb-category" class="cursor-pointer hover:text-[var(--primary)] transition">Category</span> /
+            <span id="breadcrumb-name" class="text-[var(--primary)] font-medium">Product Name</span>
+        </p>
+    
+        <div class="flex flex-col md:flex-row gap-10 mt-4">
+            
+            <div class="flex flex-col-reverse md:flex-row gap-3 w-full md:w-1/2">
+                
+                <div id="image-gallery" class="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible flex-none"></div>
+    
+                <div class="flex-1 border border-gray-500/30 rounded-lg overflow-hidden flex items-center justify-center bg-white h-auto md:h-[420px] w-full">
+                    <img id="main-image" src="" alt="Selected product" class="w-full h-full object-contain p-6">
+                </div>
+            </div>
+    
+            <div class="text-sm w-full md:w-1/2 flex flex-col">
+                <h1 id="prod-name" class="text-3xl font-medium text-gray-800">Loading...</h1>
+    
+                <div class="flex items-center gap-0.5 mt-2">
+                    <svg width="14" height="13" viewBox="0 0 18 17" class="fill-[var(--primary)]" xmlns="http://www.w3.org/2000/svg"><path d="M8.049.927c.3-.921 1.603-.921 1.902 0l1.294 3.983a1 1 0 0 0 .951.69h4.188c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 0 0-.364 1.118l1.295 3.983c.299.921-.756 1.688-1.54 1.118L9.589 13.63a1 1 0 0 0-1.176 0l-3.389 2.46c-.783.57-1.838-.197-1.539-1.118L4.78 10.99a1 1 0 0 0-.363-1.118L1.028 7.41c-.783-.57-.38-1.81.588-1.81h4.188a1 1 0 0 0 .95-.69z"/></svg>
+                    <svg width="14" height="13" viewBox="0 0 18 17" class="fill-[var(--primary)]" xmlns="http://www.w3.org/2000/svg"><path d="M8.049.927c.3-.921 1.603-.921 1.902 0l1.294 3.983a1 1 0 0 0 .951.69h4.188c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 0 0-.364 1.118l1.295 3.983c.299.921-.756 1.688-1.54 1.118L9.589 13.63a1 1 0 0 0-1.176 0l-3.389 2.46c-.783.57-1.838-.197-1.539-1.118L4.78 10.99a1 1 0 0 0-.363-1.118L1.028 7.41c-.783-.57-.38-1.81.588-1.81h4.188a1 1 0 0 0 .95-.69z"/></svg>
+                    <svg width="14" height="13" viewBox="0 0 18 17" class="fill-[var(--primary)]" xmlns="http://www.w3.org/2000/svg"><path d="M8.049.927c.3-.921 1.603-.921 1.902 0l1.294 3.983a1 1 0 0 0 .951.69h4.188c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 0 0-.364 1.118l1.295 3.983c.299.921-.756 1.688-1.54 1.118L9.589 13.63a1 1 0 0 0-1.176 0l-3.389 2.46c-.783.57-1.838-.197-1.539-1.118L4.78 10.99a1 1 0 0 0-.363-1.118L1.028 7.41c-.783-.57-.38-1.81.588-1.81h4.188a1 1 0 0 0 .95-.69z"/></svg>
+                    <svg width="14" height="13" viewBox="0 0 18 17" class="fill-[var(--primary)]" xmlns="http://www.w3.org/2000/svg"><path d="M8.049.927c.3-.921 1.603-.921 1.902 0l1.294 3.983a1 1 0 0 0 .951.69h4.188c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 0 0-.364 1.118l1.295 3.983c.299.921-.756 1.688-1.54 1.118L9.589 13.63a1 1 0 0 0-1.176 0l-3.389 2.46c-.783.57-1.838-.197-1.539-1.118L4.78 10.99a1 1 0 0 0-.363-1.118L1.028 7.41c-.783-.57-.38-1.81.588-1.81h4.188a1 1 0 0 0 .95-.69z"/></svg>
+                    <svg width="14" height="13" viewBox="0 0 18 17" class="fill-[var(--primary)] opacity-50" xmlns="http://www.w3.org/2000/svg"><path d="M8.049.927c.3-.921 1.603-.921 1.902 0l1.294 3.983a1 1 0 0 0 .951.69h4.188c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 0 0-.364 1.118l1.295 3.983c.299.921-.756 1.688-1.54 1.118L9.589 13.63a1 1 0 0 0-1.176 0l-3.389 2.46c-.783.57-1.838-.197-1.539-1.118L4.78 10.99a1 1 0 0 0-.363-1.118L1.028 7.41c-.783-.57-.38-1.81.588-1.81h4.188a1 1 0 0 0 .95-.69z"/></svg>
+                    <p class="text-base ml-2 text-gray-500">(122 reviews)</p>
+                </div>
+    
+                <div class="mt-6">
+                    <p id="prod-old-price" class="text-gray-500/70 line-through text-lg">MRP: $100</p>
+                    <p id="prod-price" class="text-3xl font-medium text-gray-900">MRP: $80</p>
+                    <span class="text-gray-500/70 block mt-1">(inclusive of all taxes)</span>
+                </div>
+    
+                <p class="text-base font-medium mt-8 text-gray-800">About Product</p>
+                <ul id="prod-desc-list" class="list-disc ml-5 mt-2 text-gray-500/70 space-y-1"></ul>
+    
+                <div class="flex items-center mt-10 gap-4 text-base">
+                    <button id="add-to-cart-btn" class="w-full py-3.5 font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition cursor-pointer rounded">
+                        Add to Cart
+                    </button>
+                    <button id="buy-now-btn" class="w-full py-3.5 font-medium bg-[var(--primary)] text-white hover:opacity-90 transition cursor-pointer rounded shadow-md">
+                        Buy now
+                    </button>
+                </div>
+            </div>
+        </div>
 
-          <div class="flex-1 flex flex-col gap-4">
-              <h1 id="prod-name" class="text-3xl font-semibold text-gray-800">Loading...</h1>
-              
-              <div class="flex items-center gap-1 text-gray-500 text-sm">
-                  <div class="flex text-[var(--primary)] text-sm">
-                      <img src="assets/star_icon.svg" class="w-4"><img src="assets/star_icon.svg" class="w-4"><img src="assets/star_icon.svg" class="w-4"><img src="assets/star_icon.svg" class="w-4"><img src="assets/star_dull_icon.svg" class="w-4">
-                  </div>
-                  <span>(122 reviews)</span>
-              </div>
+        <div class="mt-24">
+            <div class="flex flex-col items-center mb-10">
+               <p class="text-3xl font-medium uppercase text-gray-700">Related Products</p>
+               <div class="w-20 h-1 bg-[var(--primary)] rounded-full mt-2"></div>
+            </div>
+            <div id="related-products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-8"></div>
+        </div>
 
-              <div class="flex items-end gap-3">
-                  <p id="prod-price" class="text-3xl font-medium text-[var(--primary)]"></p>
-                  <p id="prod-old-price" class="text-lg text-gray-400 line-through mb-1"></p>
-              </div>
-
-              <p id="prod-desc" class="text-gray-500 text-base md:w-3/4"></p>
-
-              <div class="mt-2">
-                  <span class="text-sm font-semibold text-gray-700">Category: </span>
-                  <span id="prod-category" class="text-sm text-gray-500"></span>
-              </div>
-
-              <div class="mt-6 flex gap-4">
-                  <button id="add-to-cart-btn" class="bg-[var(--primary)] text-white px-8 py-3 rounded text-sm font-semibold hover:bg-green-700 transition active:scale-95">
-                      ADD TO CART
-                  </button>
-              </div>
-
-              <hr class="my-6 border-gray-200">
-
-              <div class="text-sm text-gray-500 flex flex-col gap-1">
-                  <p>✅ 100% Original Product.</p>
-                  <p>✅ Cash on delivery is available on this product.</p>
-                  <p>✅ Easy return and exchange policy within 7 days.</p>
-              </div>
-          </div>
-      </div>
-
-      <div class="mt-20">
-          <div class="flex flex-col items-center mb-10">
-             <p class="text-3xl font-medium uppercase text-gray-700">Related Products</p>
-             <div class="w-20 h-1 bg-[var(--primary)] rounded-full mt-2"></div>
-          </div>
-          <div id="related-products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-8"></div>
-      </div>
-
+    </div>
   </main>
 
   <div id="login-placeholder"></div>
