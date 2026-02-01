@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Login - GreenMart</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-[Outfit]">
+
+    <form id="seller-login-form" class="min-h-screen flex items-center justify-center text-sm text-gray-600 bg-gray-50/50">
+        
+        <div class="flex flex-col gap-5 m-auto items-start p-8 py-12 min-w-80 sm:min-w-96 rounded-lg shadow-xl border border-gray-200 bg-white">
+            
+            <p class="text-2xl font-medium m-auto">
+                <span class="text-[var(--primary)]">Seller</span> Login
+            </p>
+            
+            <div class="w-full">
+                <p>Email</p>
+                <input type="email" id="email" placeholder="enter your email" required
+                    class="border border-gray-200 rounded w-full p-2 mt-1 focus:border-[var(--primary)] focus:outline-[var(--primary)] outline-none transition"
+                />
+            </div>
+            
+            <div class="w-full">
+                <p>Password</p>
+                <input type="password" id="password" placeholder="enter your password" required
+                    class="border border-gray-200 rounded w-full p-2 mt-1 focus:border-[var(--primary)] focus:outline-[var(--primary)] outline-none transition"
+                />
+            </div>
+            
+            <button type="submit" class="bg-[var(--primary)] text-white w-full py-2 rounded-md cursor-pointer hover:opacity-90 transition">
+                Login
+            </button>
+
+        </div>
+
+    </form>
+
+    <script>
+        // 1. Check if already logged in (Matches your useEffect logic)
+        // React: useEffect(()=>{ if(isSeller) navigate("/seller") })
+        if (localStorage.getItem("isSeller") === "true") {
+            window.location.href = "seller-dashboard.html";
+        }
+
+        // 2. Handle Submit (Matches your onSubmitHandler)
+        document.getElementById('seller-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // React: const [email, setEmail] = useState("")
+            // Vanilla: We grab the value directly from the DOM right now.
+            const emailValue = document.getElementById('email').value;
+            const passwordValue = document.getElementById('password').value;
+
+            // React: setIsSeller(true)
+            // Vanilla: Save to LocalStorage so it persists on refresh
+            localStorage.setItem("isSeller", "true");
+            
+            // React: navigate("/seller")
+            // Vanilla: Window redirection
+            window.location.href = "seller-dashboard.html"; 
+        });
+    </script>
+
+</body>
+</html>
