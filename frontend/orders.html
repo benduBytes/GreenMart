@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders - GreenMart</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-[Outfit]">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="min-h-screen pt-16 pb-16 px-4 md:px-16 lg:px-24 xl:px-32">
+      
+    <div class="flex flex-col items-start w-max mb-8">
+        <p class="text-2xl font-medium uppercase text-gray-800">My orders</p>
+        <div class="w-16 h-0.5 bg-[var(--primary)] rounded-full mt-1"></div>
+    </div>
+
+    <div id="orders-container">
+        <p class="text-gray-500">Loading orders...</p>
+    </div>
+
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="assets/assets.js"></script>
+  <script src="assets/productsData.js"></script>
+  <script src="assets/footerData.js"></script>
+  <script src="assets/dummyOrders.js"></script>
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
