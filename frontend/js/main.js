@@ -133,6 +133,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCartPage();
     initAddressManager(); // Initialize Address Logic
   }
+
+  // 8. Orders Page
+  if (document.getElementById("orders-container")) {
+      renderOrdersPage();
+  }
+
 });
 
 // ------------------ CART CORE LOGIC ------------------
@@ -201,7 +207,7 @@ function saveCart() {
   if(document.getElementById("cart-items-list")) renderCartPage();
 }
 
-// ------------------ ADDRESS MANAGER (NEW) ------------------
+// ------------------ ADDRESS MANAGER (ADDED MISSING FUNCTION) ------------------
 function initAddressManager() {
     const addrText = document.getElementById("current-address");
     const toggleBtn = document.getElementById("toggle-address-btn");
@@ -209,7 +215,7 @@ function initAddressManager() {
 
     if (!addrText || !toggleBtn || !dropdown) return;
 
-    // 1. Function to Render Selected Address (Now shows Name & Phone)
+    // 1. Function to Render Selected Address
     const renderCurrent = () => {
         if (selectedAddress) {
             const name = selectedAddress.firstName ? `${selectedAddress.firstName} ${selectedAddress.lastName}` : "User";
@@ -226,7 +232,7 @@ function initAddressManager() {
         }
     };
 
-    // 2. Function to Render Dropdown Options
+    // 2. Render Dropdown Options
     const renderDropdown = () => {
         dropdown.innerHTML = "";
         
@@ -276,8 +282,6 @@ function initAddressManager() {
 
     renderCurrent();
 }
-
-
 // ------------------ CART PAGE RENDERER (UPDATED) ------------------
 window.updateCartQuantity = function(id, value) {
     const qty = parseInt(value);
@@ -959,4 +963,83 @@ function renderFooter() {
 
   const yearSpan = document.getElementById("copyright-year");
   if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+}
+
+// ------------------ ORDERS PAGE RENDERER (EXACT JSX MATCH) ------------------
+function renderOrdersPage() {
+    const container = document.getElementById("orders-container");
+    if (!container) return;
+    
+    // Check if data is loaded
+    if (typeof dummyOrders === 'undefined') {
+        container.innerHTML = `<p class="text-red-500 text-center py-10">Error: Order data not loaded.</p>`;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (dummyOrders.length === 0) {
+        container.innerHTML = `<p class="text-gray-500 text-center py-10">No orders found.</p>`;
+        return;
+    }
+
+    // Map through Orders (JSX: {myOrders.map(...)})
+    dummyOrders.forEach(order => {
+        
+        // Items Logic (JSX: {order.items.map(...)})
+        let itemsHtml = "";
+        
+        order.items.forEach((itemObj, index) => {
+            const product = itemObj.product;
+            if (!product) return;
+
+            const imageSrc = Array.isArray(product.image) ? product.image[0] : product.image;
+            const dateString = new Date(order.createdAt).toLocaleDateString();
+            const itemTotal = product.offerPrice * itemObj.quantity;
+
+            // Conditional Border (JSX: order.items.length !== index + 1 && "border-b")
+            const borderClass = (order.items.length !== index + 1) ? "border-b border-gray-200" : "";
+
+            itemsHtml += `
+                <div class="relative bg-white text-gray-500 ${borderClass} flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-8 w-full">
+                    
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <div class="bg-[var(--primary)]/10 p-2 rounded-lg">
+                            <img src="${imageSrc}" alt="" class="w-16 h-16 object-contain mix-blend-multiply" />
+                        </div>
+                        <div class="ml-4">
+                            <h2 class="text-lg font-medium text-gray-800">${product.name}</h2>
+                            <p class="text-sm">Category: ${product.category}</p>
+                        </div>
+                    </div>
+
+                    <div class="text-gray-600 text-sm font-medium space-y-1">
+                        <p>Quantity: ${itemObj.quantity || "1"}</p>
+                        <p>Status: <span class="text-gray-800">${order.status}</span></p>
+                        <p>Date: ${dateString}</p>
+                    </div>
+
+                    <p class="text-[var(--primary)] text-lg font-medium mt-2 md:mt-0">
+                        Amount: ${CURRENCY} ${itemTotal}
+                    </p>
+
+                </div>
+            `;
+        });
+
+        // Construct the Card (JSX: <div className='border border-gray-300 rounded-lg...'>)
+        const orderCard = document.createElement("div");
+        orderCard.className = "border border-gray-300 rounded-lg mb-10 p-4 py-5 max-w-4xl bg-white";
+        
+        orderCard.innerHTML = `
+            <div class="flex justify-between md:items-center text-gray-400 md:font-medium max-md:flex-col pb-4 border-b border-gray-100 mb-2 gap-2">
+                <span>OrderId : <span class="text-gray-700">#${order._id}</span></span>
+                <span>Payment: <span class="text-gray-700">${order.paymentType}</span></span>
+                <span>Total Amount: <span class="text-[var(--primary)]">${CURRENCY} ${order.amount}</span></span>
+            </div>
+            ${itemsHtml}
+        `;
+
+        container.appendChild(orderCard);
+    });
 }
