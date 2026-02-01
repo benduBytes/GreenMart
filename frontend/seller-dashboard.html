@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - GreenMart</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+    </style>
+</head>
+<body class="font-[Outfit] bg-gray-50 text-sm">
+
+    <script>
+        if (localStorage.getItem("isSeller") !== "true") {
+            window.location.href = "seller-login.html";
+        }
+    </script>
+
+    <div class="flex items-center justify-between px-4 md:px-8 border-b border-gray-300 py-3 bg-white sticky top-0 z-20">
+        <a href="index.html">
+            <img src="assets/logo.svg" alt="logo" class="cursor-pointer w-32 md:w-40" onerror="this.src='assets/logo.png'" />
+        </a>
+        <div class="flex items-center gap-5 text-gray-500">
+            <p>Hi! Admin</p>
+            <button id="logout-btn" class="border border-gray-300 rounded-full text-sm px-4 py-1 hover:bg-gray-50 transition cursor-pointer">
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="flex w-full min-h-screen">
+        
+        <div class="md:w-64 w-16 border-r min-h-screen text-base border-gray-300 pt-4 flex flex-col transition-all duration-300 bg-white">
+            
+            <div id="nav-add" onclick="switchView('add')" 
+                 class="sidebar-link active flex items-center py-3 px-4 gap-3 cursor-pointer border-r-4 md:border-r-[6px] bg-[var(--primary)]/10 border-[var(--primary)] text-[var(--primary)]">
+                <img src="./assets/add_icon.svg" class="w-7 h-7" alt="add">
+                <p class="md:block hidden text-center">Add Product</p>
+            </div>
+
+            <div id="nav-list" onclick="switchView('list')" 
+                 class="sidebar-link flex items-center py-3 px-4 gap-3 cursor-pointer hover:bg-gray-100/90 border-white text-gray-700 border-r-4 md:border-r-[6px] border-transparent">
+                 <img src="./assets/product_list_icon.svg" class="w-7 h-7" alt="list">
+                <p class="md:block hidden text-center">Product List</p>
+            </div>
+
+            <div id="nav-orders" onclick="switchView('orders')" 
+                 class="sidebar-link flex items-center py-3 px-4 gap-3 cursor-pointer hover:bg-gray-100/90 border-white text-gray-700 border-r-4 md:border-r-[6px] border-transparent">
+                <img src="./assets/order_icon.svg" class="w-7 h-7" alt="orders">
+                <p class="md:block hidden text-center">Orders</p>
+            </div>
+
+        </div>
+
+        <div class="flex-1 p-6 md:p-10 w-full h-screen overflow-y-scroll pb-20">
+            
+            <div id="view-add" class="content-section active w-full bg-white">
+                <form onsubmit="handleAddProduct(event)" class="md:p-10 p-4 space-y-5 max-w-lg">
+                    
+                    <div>
+                        <p class="text-base font-medium">Product Image</p>
+                        <div class="flex flex-wrap items-center gap-3 mt-2">
+                            <label for="image1">
+                                <input type="file" id="image1" hidden onchange="previewImage(event, 'preview1')" accept="image/*">
+                                <img id="preview1" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
+                            </label>
+                            <label for="image2">
+                                <input type="file" id="image2" hidden onchange="previewImage(event, 'preview2')" accept="image/*">
+                                <img id="preview2" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
+                            </label>
+                            <label for="image3">
+                                <input type="file" id="image3" hidden onchange="previewImage(event, 'preview3')" accept="image/*">
+                                <img id="preview3" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
+                            </label>
+                            <label for="image4">
+                                <input type="file" id="image4" hidden onchange="previewImage(event, 'preview4')" accept="image/*">
+                                <img id="preview4" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 max-w-md">
+                        <label class="text-base font-medium" for="product-name">Product Name</label>
+                        <input id="product-name" type="text" placeholder="Type here" required
+                            class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
+                    </div>
+
+                    <div class="flex flex-col gap-1 max-w-md">
+                        <label class="text-base font-medium" for="product-description">Product Description</label>
+                        <textarea id="product-description" rows="4" placeholder="Type here" required
+                            class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none focus:border-[var(--primary)] transition"></textarea>
+                    </div>
+
+                    <div class="w-full flex flex-col gap-1 max-w-md">
+                        <label class="text-base font-medium" for="category">Category</label>
+                        <select id="category" class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 bg-white focus:border-[var(--primary)] transition">
+                            <option value="">Select Category</option>
+                            <option value="Vegetables">Vegetables</option>
+                            <option value="Fruits">Fruits</option>
+                            <option value="Dairy">Dairy</option>
+                            <option value="Grains">Grains</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-5 flex-wrap max-w-md">
+                        <div class="flex-1 flex flex-col gap-1 w-32">
+                            <label class="text-base font-medium" for="product-price">Product Price</label>
+                            <input id="product-price" type="number" placeholder="0" required
+                                class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
+                        </div>
+                        <div class="flex-1 flex flex-col gap-1 w-32">
+                            <label class="text-base font-medium" for="offer-price">Offer Price</label>
+                            <input id="offer-price" type="number" placeholder="0" required
+                                class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="px-8 py-2.5 bg-[var(--primary)] text-white font-medium rounded hover:opacity-90 transition cursor-pointer">
+                        ADD
+                    </button>
+
+                </form>
+            </div>
+
+            <div id="view-list" class="content-section">
+                <h2 class="text-xl font-bold mb-4">All Products List</h2>
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <p class="text-gray-400">Product table will go here.</p>
+                </div>
+            </div>
+
+            <div id="view-orders" class="content-section">
+                <h2 class="text-xl font-bold mb-4">Orders</h2>
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <p class="text-gray-400">Order list will go here.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/seller.js"></script>
+
+</body>
+</html>
