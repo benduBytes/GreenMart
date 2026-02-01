@@ -1,5 +1,6 @@
 // assets/productsData.js
 
+// 1. MAIN PRODUCTS DATA
 const products = [
   // --- VEGETABLES ---
   {
@@ -353,5 +354,34 @@ const products = [
     image: ["assets/maggi_oats_image.png"],
     description: ["Healthy alternative with oats", "Good for digestion"],
     inStock: true,
+  }
+];
+
+// 2. DEFINE DUMMY PRODUCTS (Alias to products so other files can find it)
+const dummyProducts = products;
+
+// 3. DEFINE DUMMY ADDRESS (Populate so orders page doesn't crash)
+const dummyAddress = [
+  {
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@example.com",
+    street: "123 Green St",
+    city: "Mumbai",
+    state: "MH",
+    zipcode: "400001",
+    country: "India",
+    phone: "9876543210"
+  },
+  {
+    firstName: "Jane",
+    lastName: "Smith",
+    email: "jane@example.com",
+    street: "456 Market Rd",
+    city: "Delhi",
+    state: "DL",
+    zipcode: "110001",
+    country: "India",
+    phone: "1234567890"
   }
 ];
