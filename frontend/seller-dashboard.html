@@ -44,14 +44,14 @@
             </div>
 
             <div id="nav-list" onclick="switchView('list')" 
-                 class="sidebar-link flex items-center py-3 px-4 gap-3 cursor-pointer hover:bg-gray-100/90 border-white text-gray-700 border-r-4 md:border-r-[6px] border-transparent">
-                 <img src="./assets/product_list_icon.svg" class="w-7 h-7" alt="list">
+                class="sidebar-link flex items-center py-3 px-4 gap-3 cursor-pointer hover:bg-gray-100/90 text-gray-700 
+                border-r-4 md:border-r-[6px] border-transparent"> <img src="./assets/product_list_icon.svg" class="w-7 h-7" alt="list">
                 <p class="md:block hidden text-center">Product List</p>
             </div>
 
             <div id="nav-orders" onclick="switchView('orders')" 
-                 class="sidebar-link flex items-center py-3 px-4 gap-3 cursor-pointer hover:bg-gray-100/90 border-white text-gray-700 border-r-4 md:border-r-[6px] border-transparent">
-                <img src="./assets/order_icon.svg" class="w-7 h-7" alt="orders">
+                class="sidebar-link flex items-center py-3 px-4 gap-3 cursor-pointer hover:bg-gray-100/90 text-gray-700 
+                border-r-4 md:border-r-[6px] border-transparent"> <img src="./assets/order_icon.svg" class="w-7 h-7" alt="orders">
                 <p class="md:block hidden text-center">Orders</p>
             </div>
 
@@ -61,89 +61,84 @@
             
             <div id="view-add" class="content-section active w-full bg-white">
                 <form onsubmit="handleAddProduct(event)" class="md:p-10 p-4 space-y-5 max-w-lg">
-                    
                     <div>
                         <p class="text-base font-medium">Product Image</p>
                         <div class="flex flex-wrap items-center gap-3 mt-2">
-                            <label for="image1">
-                                <input type="file" id="image1" hidden onchange="previewImage(event, 'preview1')" accept="image/*">
-                                <img id="preview1" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
-                            </label>
-                            <label for="image2">
-                                <input type="file" id="image2" hidden onchange="previewImage(event, 'preview2')" accept="image/*">
-                                <img id="preview2" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
-                            </label>
-                            <label for="image3">
-                                <input type="file" id="image3" hidden onchange="previewImage(event, 'preview3')" accept="image/*">
-                                <img id="preview3" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
-                            </label>
-                            <label for="image4">
-                                <input type="file" id="image4" hidden onchange="previewImage(event, 'preview4')" accept="image/*">
-                                <img id="preview4" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload">
-                            </label>
+                            <label for="image1"><input type="file" id="image1" hidden onchange="previewImage(event, 'preview1')" accept="image/*"><img id="preview1" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload"></label>
+                            <label for="image2"><input type="file" id="image2" hidden onchange="previewImage(event, 'preview2')" accept="image/*"><img id="preview2" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload"></label>
+                            <label for="image3"><input type="file" id="image3" hidden onchange="previewImage(event, 'preview3')" accept="image/*"><img id="preview3" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload"></label>
+                            <label for="image4"><input type="file" id="image4" hidden onchange="previewImage(event, 'preview4')" accept="image/*"><img id="preview4" class="max-w-24 w-24 h-24 object-cover cursor-pointer" src="assets/upload_area.png" alt="upload"></label>
                         </div>
                     </div>
-
                     <div class="flex flex-col gap-1 max-w-md">
                         <label class="text-base font-medium" for="product-name">Product Name</label>
-                        <input id="product-name" type="text" placeholder="Type here" required
-                            class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
+                        <input id="product-name" type="text" placeholder="Type here" required class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
                     </div>
-
                     <div class="flex flex-col gap-1 max-w-md">
                         <label class="text-base font-medium" for="product-description">Product Description</label>
-                        <textarea id="product-description" rows="4" placeholder="Type here" required
-                            class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none focus:border-[var(--primary)] transition"></textarea>
+                        <textarea id="product-description" rows="4" placeholder="Type here" required class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none focus:border-[var(--primary)] transition"></textarea>
                     </div>
-
                     <div class="w-full flex flex-col gap-1 max-w-md">
                         <label class="text-base font-medium" for="category">Category</label>
                         <select id="category" class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 bg-white focus:border-[var(--primary)] transition">
-                            <option value="">Select Category</option>
-                            <option value="Vegetables">Vegetables</option>
-                            <option value="Fruits">Fruits</option>
-                            <option value="Dairy">Dairy</option>
-                            <option value="Grains">Grains</option>
+                            <option value="">Select Category</option><option value="Vegetables">Vegetables</option><option value="Fruits">Fruits</option><option value="Dairy">Dairy</option><option value="Grains">Grains</option>
                         </select>
                     </div>
-
                     <div class="flex items-center gap-5 flex-wrap max-w-md">
                         <div class="flex-1 flex flex-col gap-1 w-32">
                             <label class="text-base font-medium" for="product-price">Product Price</label>
-                            <input id="product-price" type="number" placeholder="0" required
-                                class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
+                            <input id="product-price" type="number" placeholder="0" required class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
                         </div>
                         <div class="flex-1 flex flex-col gap-1 w-32">
                             <label class="text-base font-medium" for="offer-price">Offer Price</label>
-                            <input id="offer-price" type="number" placeholder="0" required
-                                class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
+                            <input id="offer-price" type="number" placeholder="0" required class="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 focus:border-[var(--primary)] transition">
                         </div>
                     </div>
-
-                    <button type="submit" class="px-8 py-2.5 bg-[var(--primary)] text-white font-medium rounded hover:opacity-90 transition cursor-pointer">
-                        ADD
-                    </button>
-
+                    <button type="submit" class="px-8 py-2.5 bg-[var(--primary)] text-white font-medium rounded hover:opacity-90 transition cursor-pointer">ADD</button>
                 </form>
             </div>
 
-            <div id="view-list" class="content-section">
-                <h2 class="text-xl font-bold mb-4">All Products List</h2>
-                <div class="bg-white p-6 rounded-lg border border-gray-200">
-                    <p class="text-gray-400">Product table will go here.</p>
+            <div id="view-list" class="content-section w-full bg-white">
+                <div class="w-full md:p-10 p-4">
+                    <h2 class="pb-4 text-lg font-medium">All Products</h2>
+                    <div class="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="text-gray-900 text-sm bg-gray-50 border-b border-gray-500/20">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold truncate">Product</th>
+                                    <th class="px-4 py-3 font-semibold truncate">Category</th>
+                                    <th class="px-4 py-3 font-semibold truncate max-sm:hidden">Price</th>
+                                    <th class="px-4 py-3 font-semibold truncate text-center">In Stock</th>
+                                    <th class="px-4 py-3 font-semibold truncate text-center">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-table-body" class="text-sm text-gray-500">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div id="view-orders" class="content-section">
+            <!-- <div id="view-orders" class="content-section">
                 <h2 class="text-xl font-bold mb-4">Orders</h2>
                 <div class="bg-white p-6 rounded-lg border border-gray-200">
                     <p class="text-gray-400">Order list will go here.</p>
+                </div>
+            </div> -->
+            <div id="view-orders" class="content-section w-full bg-white">
+                <div class="md:p-10 p-4 space-y-4">
+                    <h2 class="text-lg font-medium">Orders List</h2>
+                    
+                    <div id="orders-container" class="space-y-4">
+                        </div>
                 </div>
             </div>
 
         </div>
     </div>
 
+    <script src="assets/productsData.js"></script>
+    <script src="assets/dummyOrders.js"></script>
     <script src="js/seller.js"></script>
 
 </body>
